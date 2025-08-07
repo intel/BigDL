@@ -16,7 +16,7 @@ BigDL seamlessly scales your data analytics & AI applications from laptop to clo
 
 - `LLM` ***(deprecated - please use [IPEX-LLM](https://github.com/intel-analytics/ipex-llm) instead)***: Optimizaed large language model library for Intel CPU and GPU
 
-- [Orca](#orca): Distributed Big Data & AI (TF & PyTorch) Pipeline on Spark and Ray
+- [Orca](#orca): Distributed Big Data & AI (TF & PyTorch) Pipeline on Apache Spark and Ray
 
 - [Nano](#nano): Transparent Acceleration of Tensorflow & PyTorch Programs on Intel CPU/GPU
 
