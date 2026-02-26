@@ -6,7 +6,7 @@
 
 intel-openmp
 cloudpickle
-protobuf==4.25.8
+protobuf>=5.29.6
 py-cpuinfo
 pyyaml
 packaging
