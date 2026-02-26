@@ -138,7 +138,7 @@ def setup_package():
 
     install_requires = ["intel-openmp; (platform_machine=='x86_64' or platform_machine == 'AMD64')",
                         "cloudpickle",
-                        "protobuf==4.25.8",
+                        "protobuf>=5.29.6",
                         "py-cpuinfo",
                         "pyyaml",
                         "packaging",
