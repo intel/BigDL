@@ -1,4 +1,4 @@
-name: Performance Regression Test
+name: Performance Regression test
 
 permissions:
   contents: read
