@@ -31,7 +31,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import cloudpickle
 import os
 import multiprocessing
 import subprocess
@@ -46,6 +45,7 @@ import pytorch_lightning as pl
 from bigdl.nano.pytorch.strategies.ddp_spawn import DDPSpawnStrategy, _DDPSpawnLauncher
 from bigdl.nano.utils.common import schedule_processors
 from bigdl.nano.utils.common import invalidInputError
+from bigdl.nano.utils.common import SafePickle
 from bigdl.nano.pytorch.dispatcher import _get_patch_status
 
 import logging
@@ -100,9 +100,9 @@ class _DDPSubprocessLauncher(_DDPSpawnLauncher):
             # `self._wrapping_function`.
             with open(os.path.join(temp_dir, "args.pkl"), "wb") as f:
                 if trainer is not None:
-                    cloudpickle.dump((None, args, error_queue), f)
+                    SafePickle.dump((None, args, error_queue), f)
                 else:
-                    cloudpickle.dump((self._wrapping_function, args, error_queue), f)
+                    SafePickle.dump((self._wrapping_function, args, error_queue), f)
 
             # we also need to pass sys.path to subprocess
             with open(os.path.join(temp_dir, "sys_path.json"), "w") as f:

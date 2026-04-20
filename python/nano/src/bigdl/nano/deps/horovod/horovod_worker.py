@@ -15,18 +15,18 @@
 #
 
 import os
-import cloudpickle
 import sys
+from bigdl.nano.utils.common import SafePickle
 
 
 if __name__ == '__main__':
     temp_dir = sys.argv[1]
 
     with open(os.path.join(temp_dir, "args.pkl"), 'rb') as f:
-        args = cloudpickle.load(f)
+        args = SafePickle.load(f)
 
     with open(os.path.join(temp_dir, "target.pkl"), 'rb') as f:
-        target = cloudpickle.load(f)
+        target = SafePickle.load(f)
 
     import horovod.tensorflow.keras as hvd
     hvd.init()
@@ -36,4 +36,4 @@ if __name__ == '__main__':
 
     with open(os.path.join(temp_dir,
                            f"history_{idx}"), "wb") as f:
-        cloudpickle.dump(history, f)
+        SafePickle.dump(history, f)

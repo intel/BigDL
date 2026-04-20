@@ -18,10 +18,10 @@ import os
 import sys
 import json
 
-import cloudpickle
 import multiprocessing
 from torch.multiprocessing.spawn import _wrap
 from bigdl.nano.pytorch.dispatcher import patch_torch
+from bigdl.nano.utils.common import SafePickle
 
 
 if __name__ == '__main__':
@@ -44,7 +44,7 @@ if __name__ == '__main__':
             patch_torch(cuda_to_cpu=patch_status['patch_cuda'])
 
     with open(os.path.join(temp_dir, "args.pkl"), "rb") as f:
-        (fn, args, error_queue) = cloudpickle.load(f)
+        (fn, args, error_queue) = SafePickle.load(f)
 
     # args[0] is `trainer`, when it is None, it means when are using LightningLite,
     # otherwise we are using trainer, for the details here, see `ddp_subprocess.py`
