@@ -3,7 +3,7 @@ scipy
 ftfy
 openvino-dev
 gradio
-diffusers==0.11.1
+diffusers==0.38.0
 psutil
 click
 bigdl-nano[pytorch]>=2.3.0b20230220
