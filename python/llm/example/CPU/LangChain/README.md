@@ -27,9 +27,9 @@ python transformers_int4/chat.py -m <path_to_model> [-q <your_question>]
 ```
 > Note: if `-q` is not specified, it will use `What is AI` by default. 
 
-### Example: RAG (Retrival Augmented Generation) 
+### Example: RAG (Retrieval Augmented Generation)
 
-The RAG example ([rag.py](./transformers_int4/rag.py)) shows how to load the input text into vector database,  and then use `load_qa_chain` to build a retrival pipeline.
+The RAG example ([rag.py](./transformers_int4/rag.py)) shows how to load the input text into vector database,  and then use `load_qa_chain` to build a retrieval pipeline.
 
 To run the example, execute the following command in the current directory:
 
