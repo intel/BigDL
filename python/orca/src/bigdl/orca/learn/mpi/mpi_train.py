@@ -16,7 +16,7 @@
 
 import os
 import argparse
-import cloudpickle
+from bigdl.nano.utils.common import SafePickle
 from bigdl.dllib.utils.utils import get_node_ip
 
 print(f"Worker on {get_node_ip()} with global rank {os.environ.get('PMI_RANK', 0)}")
@@ -29,12 +29,12 @@ pkl_path = args.pkl_path
 
 with open("{}/saved_mpi_estimator.pkl".format(pkl_path), "rb") as f:
     model_creator, optimizer_creator, loss_creator, metrics, \
-        scheduler_creator, config, init_func = cloudpickle.load(f)
+        scheduler_creator, config, init_func = SafePickle.load(f)
 
 with open("{}/mpi_train_data.pkl".format(pkl_path), "rb") as f:
     train_data_creator, epochs, batch_size, validation_data_creator,\
         validate_batch_size, train_func, validate_func, train_batches, \
-        validate_batches, validate_steps = cloudpickle.load(f)
+        validate_batches, validate_steps = SafePickle.load(f)
 config["batch_size"] = batch_size
 config["validate_batch_size"] = validate_batch_size
 

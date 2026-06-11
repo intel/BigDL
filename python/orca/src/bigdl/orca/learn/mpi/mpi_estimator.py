@@ -18,13 +18,13 @@ import os
 import subprocess
 import types
 
-import cloudpickle
 from pyspark.rdd import RDD
 from pyspark.sql import DataFrame
 from torch.utils.data import Dataset, DataLoader
 
 from bigdl.dllib.utils.log4Error import *
 from bigdl.dllib.utils.utils import get_node_ip
+from bigdl.nano.utils.common import SafePickle
 from bigdl.orca.learn.mpi.mpi_runner import MPIRunner
 from bigdl.orca.learn.mpi.utils import *
 
@@ -69,11 +69,13 @@ class MPIEstimator:
         :param env: Special environment should be passed to MPI environment.
         """
         self.dir = os.getcwd()
+        SafePickle._get_key()
         self.mpi_runner = MPIRunner(hosts=hosts, processes_per_node=workers_per_node, env=env)
         with open("saved_mpi_estimator.pkl", "wb") as f:
-            cloudpickle.dump((model_creator, optimizer_creator, loss_creator, metrics,
-                              scheduler_creator, config, init_func), f)
+            SafePickle.dump((model_creator, optimizer_creator, loss_creator, metrics,
+                             scheduler_creator, config, init_func), f)
         self.mpi_runner.scp_file("saved_mpi_estimator.pkl", self.dir)
+        self.mpi_runner.scp_file("saved_mpi_estimator.pkl.sig", self.dir)
         # Need to put mpi_train.py in the current directory so that the PYTHONPATH is the same.
         train_file = os.path.abspath(__file__ + "/../mpi_train.py")
         p = subprocess.Popen(["cp", train_file, self.dir])
@@ -196,10 +198,11 @@ class MPIEstimator:
                 validate_func = validate
 
         with open("mpi_train_data.pkl", "wb") as f:
-            cloudpickle.dump((data_creator, epochs, batch_size, validation_data_creator,
-                              validate_batch_size, train_func, validate_func, train_batches,
-                              validate_batches, validate_steps), f)
+            SafePickle.dump((data_creator, epochs, batch_size, validation_data_creator,
+                             validate_batch_size, train_func, validate_func, train_batches,
+                             validate_batches, validate_steps), f)
         self.mpi_runner.scp_file("mpi_train_data.pkl", self.dir)
+        self.mpi_runner.scp_file("mpi_train_data.pkl.sig", self.dir)
         self.mpi_runner.run("{}/mpi_train.py".format(self.dir),
                             mpi_options=mpi_options,
                             pkl_path=self.dir)

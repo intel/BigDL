@@ -43,15 +43,15 @@ class MultiprocessingBackend(Backend):
         return self.run_subprocess(target, args=args, nprocs=nprocs, envs=envs)
 
     def run_subprocess(self, target, args=..., nprocs=1, envs=None) -> Any:
-        import cloudpickle
+        from bigdl.nano.utils.common import SafePickle
         import subprocess
         import sys
 
         with TemporaryDirectory() as temp_dir:
             with open(os.path.join(temp_dir, "args.pkl"), 'wb') as f:
-                cloudpickle.dump(args, f)
+                SafePickle.dump(args, f)
             with open(os.path.join(temp_dir, "target.pkl"), 'wb') as f:
-                cloudpickle.dump(target, f)
+                SafePickle.dump(target, f)
 
             ex_list = []
             cwd_path = os.path.dirname(__file__)
@@ -72,5 +72,5 @@ class MultiprocessingBackend(Backend):
             results = []
             for i in range(nprocs):
                 with open(os.path.join(temp_dir, f"history_{i}"), "rb") as f:
-                    results.append(cloudpickle.load(f))
+                    results.append(SafePickle.load(f))
         return results

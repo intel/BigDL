@@ -16,9 +16,9 @@
 
 import json
 import os
-import cloudpickle
 import sys
 import tensorflow as tf
+from bigdl.nano.utils.common import SafePickle
 
 if __name__ == '__main__':
     # Set number of threads in subprocess
@@ -27,14 +27,14 @@ if __name__ == '__main__':
     temp_dir = sys.argv[1]
 
     with open(os.path.join(temp_dir, "args.pkl"), 'rb') as f:
-        args = cloudpickle.load(f)
+        args = SafePickle.load(f)
 
     with open(os.path.join(temp_dir, "target.pkl"), 'rb') as f:
-        target = cloudpickle.load(f)
+        target = SafePickle.load(f)
 
     history = target(*args)
     tf_config = json.loads(os.environ["TF_CONFIG"])
 
     with open(os.path.join(temp_dir,
                            f"history_{tf_config['task']['index']}"), "wb") as f:
-        cloudpickle.dump(history, f)
+        SafePickle.dump(history, f)

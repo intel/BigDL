@@ -14,6 +14,7 @@
 # limitations under the License.
 #
 
+import os
 import pickle
 import hmac
 import hashlib
@@ -24,39 +25,69 @@ from bigdl.ppml.utils.log4Error import invalidInputError
 
 
 class SafePickle:
-    key = b'shared-key'
-    """
-    Example:
-        >>> from bigdl.ppml.utils.safepickle import SafePickle
-        >>> with open(file_path, 'wb') as file:
-        >>>     signature = SafePickle.dump(data, file, return_digest=True)
-        >>> with open(file_path, 'rb') as file:
-        >>>     data = SafePickle.load(file, signature)
-    """
-    @classmethod
-    def dump(self, obj, file, return_digest=False, *args, **kwargs):
-        if return_digest:
-            pickled_data = pickle.dumps(obj)
-            file.write(pickled_data)
-            digest = hmac.new(self.key, pickled_data, hashlib.sha1).hexdigest()
-            return digest
-        else:
-            pickle.dump(obj, file, *args, **kwargs)
+    _key = None
 
     @classmethod
-    def load(self, file, digest=None, *args, **kwargs):
+    def _get_key(cls):
+        if cls._key is None:
+            env_key = os.environ.get('BIGDL_SAFE_PICKLE_KEY')
+            if env_key:
+                cls._key = bytes.fromhex(env_key)
+            else:
+                cls._key = os.urandom(32)
+                os.environ['BIGDL_SAFE_PICKLE_KEY'] = cls._key.hex()
+        return cls._key
+
+    @classmethod
+    def dump(cls, obj, file, return_digest=False, *args, **kwargs):
+        """
+        Example:
+            >>> from bigdl.ppml.utils.safepickle import SafePickle
+            >>> with open(file_path, 'wb') as file:
+            >>>     SafePickle.dump(data, file)
+        """
+        pickled_data = pickle.dumps(obj)
+        file.write(pickled_data)
+        digest = hmac.new(cls._get_key(), pickled_data, hashlib.sha256).hexdigest()
+        if return_digest:
+            return digest
+        sig_path = file.name + '.sig'
+        with open(sig_path, 'w') as sig_file:
+            sig_file.write(digest)
+
+    @classmethod
+    def load(cls, file, digest=None, *args, **kwargs):
+        """
+        Example:
+            >>> from bigdl.ppml.utils.safepickle import SafePickle
+            >>> with open(file_path, 'rb') as file:
+            >>>     data = SafePickle.load(file)
+        """
+        content = file.read()
+
+        if digest is None:
+            sig_path = file.name + '.sig'
+            if os.path.exists(sig_path):
+                with open(sig_path, 'r') as sig_file:
+                    digest = sig_file.read().strip()
+
         if digest:
-            content = file.read()
-            new_digest = hmac.new(self.key, content, hashlib.sha1).hexdigest()
-            if digest != new_digest:
-                invalidInputError(False, 'Pickle safe check failed')
-            file.seek(0)
-        return pickle.load(file, *args, **kwargs)
-    
+            new_digest = hmac.new(cls._get_key(), content, hashlib.sha256).hexdigest()
+            if not hmac.compare_digest(digest, new_digest):
+                invalidInputError(False,
+                                  'Pickle integrity check failed: '
+                                  'file may have been tampered with')
+        else:
+            invalidInputError(False,
+                              'No HMAC signature found for pickle file: '
+                              'cannot verify integrity')
+
+        return pickle.loads(content, *args, **kwargs)
+
     @classmethod
-    def dumps(self, obj, *args, **kwargs):
+    def dumps(cls, obj, *args, **kwargs):
         return pickle.dumps(obj, *args, **kwargs)
-    
+
     @classmethod
-    def loads(self, data, *args, **kwargs):
+    def loads(cls, data, *args, **kwargs):
         return pickle.loads(data, *args, **kwargs)

@@ -85,6 +85,10 @@ class MPIRunner:
             invalidInputError(str.isdigit(mpi_env["OMP_NUM_THREADS"]),
                               "OMP_NUM_THREADS must be a positive integer")
             mpi_config.extend(["-genv", "OMP_NUM_THREADS={}".format(mpi_env["OMP_NUM_THREADS"])])
+        if "BIGDL_SAFE_PICKLE_KEY" in mpi_env:
+            mpi_config.extend(["-genv",
+                               "BIGDL_SAFE_PICKLE_KEY={}".format(
+                                   mpi_env["BIGDL_SAFE_PICKLE_KEY"])])
         if len(self.remote_hosts) > 0:
             mpi_config.extend(["-hosts", ",".join(self.hosts)])
         if mpi_options:
